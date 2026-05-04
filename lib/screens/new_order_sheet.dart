@@ -226,7 +226,7 @@ class _NewOrderSheetState extends ConsumerState<NewOrderSheet> {
                                   // DEFENSIVE: Only show dropdown if value is valid or null
                                   DropdownButtonFormField<int?>(
                                     isExpanded: true,
-                                    value: _selectedTableId != null && 
+                                    initialValue: _selectedTableId != null && 
                                             availableTables.any((t) => t.id == _selectedTableId)
                                         ? _selectedTableId 
                                         : null,
@@ -289,10 +289,10 @@ class _NewOrderSheetState extends ConsumerState<NewOrderSheet> {
                                       curve: Curves.easeOutCubic,
                                       padding: const EdgeInsets.all(16),
                                       decoration: BoxDecoration(
-                                        color: inOrder ? cs.primary.withOpacity(0.08) : cs.surface,
+                                        color: inOrder ? cs.primary.withValues(alpha: 0.08) : cs.surface,
                                         borderRadius: BorderRadius.circular(16),
                                         border: Border.all(color: inOrder ? cs.primary : cs.outline, width: inOrder ? 1.5 : 1),
-                                        boxShadow: inOrder ? null : [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8)],
+                                        boxShadow: inOrder ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 8)],
                                       ),
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +330,7 @@ class _NewOrderSheetState extends ConsumerState<NewOrderSheet> {
                             left: isWide ? BorderSide(color: cs.outline) : BorderSide.none,
                             top: !isWide ? BorderSide(color: cs.outline) : BorderSide.none,
                           ),
-                          boxShadow: isWide ? [BoxShadow(color: Colors.black.withOpacity(0.03), offset: const Offset(-5, 0), blurRadius: 10)] : null,
+                          boxShadow: isWide ? [BoxShadow(color: Colors.black.withValues(alpha: 0.03), offset: const Offset(-5, 0), blurRadius: 10)] : null,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,7 +410,7 @@ class _QtyBtn extends StatelessWidget {
       child: Container(
         width: 28, height: 28,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 16),

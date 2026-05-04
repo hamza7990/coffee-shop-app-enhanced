@@ -19,20 +19,16 @@ class LoadingIndicator extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             child: CircularProgressIndicator(
-              strokeWidth: 3,
+              strokeWidth: 2.5,
               color: cs.primary,
             ),
           ),
           if (message != null) ...[
-            const SizedBox(height: 16),
-            Text(message!,
-                style: TextStyle(
-                    fontSize: 14,
-                    color: cs.onSurface.withOpacity(0.5),
-                    fontFamily: 'Inter')),
+            AppSpacing.h16,
+            Text(message!, style: AppTextStyles.muted(context, size: 14)),
           ],
         ],
       ),
@@ -48,12 +44,11 @@ class ErrorDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -61,32 +56,25 @@ class ErrorDisplay extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(isDark ? 0.2 : 0.1),
+                color: isDark ? AppColors.errorDarkBg : AppColors.errorLight,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.cloud_off_rounded,
+              child: const Icon(Icons.cloud_off_rounded,
                   color: AppColors.error, size: 28),
             ),
-            const SizedBox(height: 16),
+            AppSpacing.h16,
             Text('Something went wrong',
                 style: AppTextStyles.title(context, size: 18)),
-            const SizedBox(height: 8),
+            AppSpacing.h8,
             Text(message,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 13,
-                    color: cs.onSurface.withOpacity(0.5),
-                    fontFamily: 'Inter')),
+                style: AppTextStyles.muted(context)),
             if (onRetry != null) ...[
-              const SizedBox(height: 20),
+              AppSpacing.h20,
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text('Try Again'),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
               ),
             ],
           ],
@@ -104,26 +92,22 @@ class OfflineBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.accentGold.withOpacity(0.15),
+        color: isDark ? AppColors.warningDarkBg : AppColors.warningLight,
         border: Border(
-            bottom: BorderSide(color: AppColors.accentGold.withOpacity(0.3))),
+            bottom: BorderSide(color: AppColors.warning.withValues(alpha: 0.3))),
       ),
       child: Row(
         children: [
-          Icon(Icons.wifi_off_rounded,
-              size: 16, color: AppColors.accentGold),
-          const SizedBox(width: 8),
+          const Icon(Icons.wifi_off_rounded, size: 16, color: AppColors.warning),
+          AppSpacing.w8,
           Expanded(
             child: Text(message,
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.accentGold,
-                    fontFamily: 'Inter')),
+                style: AppTextStyles.caption(context, color: AppColors.warning)),
           ),
         ],
       ),
@@ -146,7 +130,7 @@ class LoadingOverlay extends StatelessWidget {
         if (isLoading)
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               child: const LoadingIndicator(message: 'Processing…'),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'providers/theme_provider.dart';
 import 'providers/auth_provider.dart';
@@ -8,14 +9,17 @@ import 'providers/api_provider.dart';
 import 'data/local_storage_repository.dart';
 import 'data/api_client.dart';
 import 'theme/app_theme.dart';
+import 'utils/app_config.dart';
 import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/admin_dashboard.dart';
+import 'screens/manager_dashboard.dart';
+import 'screens/employee_dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   final repo = await LocalStorageRepository.init();
-  final apiClient = ApiClient(baseUrl: 'http://localhost:5000/api');
+  final apiClient = ApiClient(baseUrl: AppConfig.apiUrl);
 
   runApp(
     ProviderScope(
@@ -28,6 +32,55 @@ void main() async {
   );
 }
 
+final routerProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authProvider);
+
+  return GoRouter(
+    initialLocation: '/login',
+    redirect: (context, state) {
+      final loggedIn = authState.isLoggedIn;
+      final isLoggingIn = state.matchedLocation == '/login';
+
+      if (!loggedIn) {
+        return isLoggingIn ? null : '/login';
+      }
+
+      if (loggedIn && isLoggingIn) {
+        final role = authState.role;
+        if (role == 'Admin') return '/admin';
+        if (role == 'Manager') return '/manager';
+        if (role == 'Employee') return '/employee';
+        return '/login'; // Fallback
+      }
+
+      // Protect routes based on roles
+      if (state.matchedLocation.startsWith('/admin') && authState.role != 'Admin') return '/login';
+      if (state.matchedLocation.startsWith('/manager') && authState.role != 'Manager') return '/login';
+      if (state.matchedLocation.startsWith('/employee') && authState.role != 'Employee') return '/login';
+
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(key: ValueKey('login')),
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) => const AdminDashboard(),
+      ),
+      GoRoute(
+        path: '/manager',
+        builder: (context, state) => const ManagerDashboard(),
+      ),
+      GoRoute(
+        path: '/employee',
+        builder: (context, state) => const EmployeeDashboard(),
+      ),
+    ],
+  );
+});
+
 class BrewhausApp extends ConsumerWidget {
   const BrewhausApp({super.key});
 
@@ -36,21 +89,15 @@ class BrewhausApp extends ConsumerWidget {
     final isDark = ref.watch(themeProvider);
     final themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
 
-    final authState = ref.watch(authProvider);
+    final router = ref.watch(routerProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Brewhaus',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-
-      home: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: authState.isLoggedIn
-            ? const HomeScreen(key: ValueKey('home'))
-            : const LoginScreen(key: ValueKey('login')),
-      ),
+      routerConfig: router,
     );
   }
 }

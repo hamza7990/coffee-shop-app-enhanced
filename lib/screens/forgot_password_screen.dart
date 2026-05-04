@@ -56,7 +56,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final emailRegex = RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Please enter a valid email';
     }
@@ -99,7 +99,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              cs.primary.withOpacity(0.05),
+              cs.primary.withValues(alpha: 0.05),
               cs.surface,
             ],
           ),
@@ -120,7 +120,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: cs.primary.withOpacity(0.1),
+                          color: cs.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -134,7 +134,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                       // Title card
                       Card(
                         elevation: 8,
-                        shadowColor: cs.primary.withOpacity(0.2),
+                        shadowColor: cs.primary.withValues(alpha: 0.2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -158,7 +158,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                                 Text(
                                   'Enter your email address and we\'ll send you a link to reset your password.',
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: cs.onSurface.withOpacity(0.7),
+                                    color: cs.onSurface.withValues(alpha: 0.7),
                                     height: 1.5,
                                   ),
                                   textAlign: TextAlign.center,
@@ -170,20 +170,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: AppColors.error.withOpacity(0.1),
+                                      color: AppColors.error.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.error.withOpacity(0.3),
+                                        color: AppColors.error.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
                                       children: [
-                                        Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                                        const Icon(Icons.error_outline, color: AppColors.error, size: 20),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             authState.errorMessage!,
-                                            style: TextStyle(color: AppColors.error, fontSize: 13),
+                                            style: const TextStyle(color: AppColors.error, fontSize: 13),
                                           ),
                                         ),
                                       ],
@@ -202,14 +202,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                                     hintText: 'Enter your registered email',
                                     prefixIcon: Icon(Icons.email_outlined, color: cs.primary),
                                     filled: true,
-                                    fillColor: cs.surfaceContainerHighest.withOpacity(0.3),
+                                    fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide.none,
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: cs.outline.withOpacity(0.3)),
+                                      borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.3)),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -217,7 +217,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: AppColors.error, width: 1),
+                                      borderSide: const BorderSide(color: AppColors.error, width: 1),
                                     ),
                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                   ),
@@ -283,13 +283,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
 
                                 // Demo token input for testing
                                 const SizedBox(height: 32),
-                                Divider(color: cs.outline.withOpacity(0.3)),
+                                Divider(color: cs.outline.withValues(alpha: 0.3)),
                                 const SizedBox(height: 16),
                                 Text(
                                   'Have a reset token?',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: cs.onSurface.withOpacity(0.5),
+                                    color: cs.onSurface.withValues(alpha: 0.5),
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -340,10 +340,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.check_circle_outline,
                 size: 50,
                 color: AppColors.success,
@@ -363,7 +363,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: cs.onSurface.withOpacity(0.7),
+                color: cs.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 24),

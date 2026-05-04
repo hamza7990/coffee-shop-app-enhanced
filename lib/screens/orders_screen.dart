@@ -84,7 +84,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> with SingleTickerPr
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   labelColor: Colors.white,
-                  unselectedLabelColor: cs.onSurface.withOpacity(0.5),
+                  unselectedLabelColor: cs.onSurface.withValues(alpha: 0.5),
                   dividerColor: Colors.transparent,
                   tabs: [
                     Tab(text: 'Active (${orders.active.length})'),
@@ -185,7 +185,7 @@ class _ActiveOrderCard extends ConsumerWidget {
             child: Row(children: [
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(order.id, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                Text('Table ${order.tableId}', style: TextStyle(fontSize: 12, color: cs.onSurface.withOpacity(0.5))),
+                Text('Table ${order.tableId}', style: TextStyle(fontSize: 12, color: cs.onSurface.withValues(alpha: 0.5))),
               ]),
               const Spacer(),
               Text('\$${total.toStringAsFixed(2)}',
@@ -208,7 +208,7 @@ class _ActiveOrderCard extends ConsumerWidget {
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text(mi.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text('\$${mi.price.toStringAsFixed(2)} ea.',
-                          style: TextStyle(fontSize: 11, color: cs.onSurface.withOpacity(0.4))),
+                          style: TextStyle(fontSize: 11, color: cs.onSurface.withValues(alpha: 0.4))),
                     ])),
                     // Qty controls
                     _SmallQtyBtn(icon: Icons.remove, onTap: () {
@@ -278,7 +278,7 @@ class _CompletedOrdersTab extends StatelessWidget {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              headingRowColor: WidgetStatePropertyAll(cs.outline.withOpacity(0.3)),
+              headingRowColor: WidgetStatePropertyAll(cs.outline.withValues(alpha: 0.3)),
               columns: const [
                 DataColumn(label: Text('Order ID')),
                 DataColumn(label: Text('Table')),

@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import '../providers/order_provider.dart';
 import '../providers/menu_provider.dart';
 import '../providers/table_provider.dart';
+import '../providers/dashboard_stats_provider.dart';
 import '../models/menu_item.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -47,7 +48,13 @@ class DashboardScreen extends ConsumerWidget {
       );
     }
 
-    // Safely unwrap data with fallbacks
+    final stats = ref.watch(dashboardStatsProvider);
+    final totalRev = stats.totalRevenue;
+    final avgOrder = stats.avgOrderValue;
+    final occupancy = stats.occupancyPercentage;
+    final top5 = stats.popularItems;
+
+    // Safely unwrap data with fallbacks for Active Orders
     final orders     = orderAsync.value ?? const OrderState(active: [], completed: [], counter: 1);
     final menuItems  = menuAsync.value ?? <MenuItem>[];
     final tableList  = tableAsync.value ?? [];
@@ -55,27 +62,6 @@ class DashboardScreen extends ConsumerWidget {
 
     // Use safe extension for menu lookup
     MenuItem? findMenuItem(String id) => menuItems.findById(id);
-
-    // ── Derived stats ────────────────────────────────────────
-    final completed  = orders.completed;
-    final totalRev   = completed.fold<double>(0, (s, o) => s + (o.total ?? 0));
-    final avgOrder   = completed.isEmpty ? 0.0 : totalRev / completed.length;
-    final occupancy  = tableList.isEmpty
-        ? 0 : (tableProv.occupiedCount / tableList.length * 100).round();
-
-    // Popular items from completed orders
-    final Map<String, int> counts = {};
-    for (final o in completed) {
-      for (final i in o.items) {
-        counts[i.menuItemId] = (counts[i.menuItemId] ?? 0) + i.quantity;
-      }
-    }
-    final popular = counts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final top5 = popular.take(5).map((e) {
-      final item = findMenuItem(e.key);
-      return (item: item, qty: e.value);
-    }).where((e) => e.item != null).toList();
 
     final chartColors = isDark ? AppColors.chartDark : AppColors.chartLight;
 
@@ -118,7 +104,7 @@ class DashboardScreen extends ConsumerWidget {
                   iconBg: AppColors.accentLight, badge: '+12.5%',
                 ),
                 StatCard(
-                  label: 'Total Orders', value: '${completed.length}',
+                  label: 'Total Orders', value: '${orders.completed.length}',
                   icon: Icons.receipt_long, iconColor: AppColors.success,
                   iconBg: isDark ? AppColors.successDarkBg : AppColors.successLight, badge: '+8.2%',
                 ),
@@ -169,13 +155,13 @@ class DashboardScreen extends ConsumerWidget {
                             showTitles: true, reservedSize: 22,
                             getTitlesWidget: (v, _) => Text(
                               seedWeekly[v.toInt()].day,
-                              style: TextStyle(fontSize: wide ? 11 : 9, color: cs.onSurface.withOpacity(0.5)), // Smaller font on mobile
+                              style: TextStyle(fontSize: wide ? 11 : 9, color: cs.onSurface.withValues(alpha: 0.5)), // Smaller font on mobile
                             ),
                           )),
                           leftTitles: AxisTitles(sideTitles: SideTitles(
                             showTitles: true, reservedSize: wide ? 44 : 36,
                             getTitlesWidget: (v, _) => Text('\$${v.toInt()}',
-                                style: TextStyle(fontSize: wide ? 10 : 8, color: cs.onSurface.withOpacity(0.5))),
+                                style: TextStyle(fontSize: wide ? 10 : 8, color: cs.onSurface.withValues(alpha: 0.5))),
                           )),
                           topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                           rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -271,7 +257,7 @@ class DashboardScreen extends ConsumerWidget {
                     width: 10, height: 10,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle, color: AppColors.success,
-                      boxShadow: [BoxShadow(color: AppColors.success.withOpacity(0.4), blurRadius: 6, spreadRadius: 2)],
+                      boxShadow: [BoxShadow(color: AppColors.success.withValues(alpha: 0.4), blurRadius: 6, spreadRadius: 2)],
                     ),
                   ),
                 ]),
@@ -295,7 +281,7 @@ class DashboardScreen extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: AppColors.accentLight,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                         ),
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -306,7 +292,7 @@ class DashboardScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 4),
                             Text('${o.items.length} items',
-                                style: TextStyle(fontSize: 12, color: cs.onSurface.withOpacity(0.5))),
+                                style: TextStyle(fontSize: 12, color: cs.onSurface.withValues(alpha: 0.5))),
                           ]),
                           const SizedBox(height: 8),
                           FittedBox( // لحماية السعر من الـ Overflow

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
-import 'login_screen.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   final String? email;
@@ -134,7 +133,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              cs.primary.withOpacity(0.05),
+              cs.primary.withValues(alpha: 0.05),
               cs.surface,
             ],
           ),
@@ -155,7 +154,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: cs.primary.withOpacity(0.1),
+                          color: cs.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -169,7 +168,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                       // Title card
                       Card(
                         elevation: 8,
-                        shadowColor: cs.primary.withOpacity(0.2),
+                        shadowColor: cs.primary.withValues(alpha: 0.2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -193,7 +192,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                 Text(
                                   'Enter the reset token from your email and create a new password.',
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: cs.onSurface.withOpacity(0.7),
+                                    color: cs.onSurface.withValues(alpha: 0.7),
                                     height: 1.5,
                                   ),
                                   textAlign: TextAlign.center,
@@ -205,20 +204,20 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: AppColors.error.withOpacity(0.1),
+                                      color: AppColors.error.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.error.withOpacity(0.3),
+                                        color: AppColors.error.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
                                       children: [
-                                        Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                                        const Icon(Icons.error_outline, color: AppColors.error, size: 20),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             authState.errorMessage!,
-                                            style: TextStyle(color: AppColors.error, fontSize: 13),
+                                            style: const TextStyle(color: AppColors.error, fontSize: 13),
                                           ),
                                         ),
                                       ],
@@ -237,14 +236,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                     hintText: 'Enter the token from email',
                                     prefixIcon: Icon(Icons.confirmation_number_outlined, color: cs.primary),
                                     filled: true,
-                                    fillColor: cs.surfaceContainerHighest.withOpacity(0.3),
+                                    fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide.none,
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: cs.outline.withOpacity(0.3)),
+                                      borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.3)),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -252,7 +251,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: AppColors.error, width: 1),
+                                      borderSide: const BorderSide(color: AppColors.error, width: 1),
                                     ),
                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                   ),
@@ -271,19 +270,19 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                                        color: cs.onSurface.withOpacity(0.5),
+                                        color: cs.onSurface.withValues(alpha: 0.5),
                                       ),
                                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                                     ),
                                     filled: true,
-                                    fillColor: cs.surfaceContainerHighest.withOpacity(0.3),
+                                    fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide.none,
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: cs.outline.withOpacity(0.3)),
+                                      borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.3)),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -291,7 +290,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: AppColors.error, width: 1),
+                                      borderSide: const BorderSide(color: AppColors.error, width: 1),
                                     ),
                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                   ),
@@ -302,7 +301,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                   'Min 6 chars, 1 uppercase, 1 number',
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: cs.onSurface.withOpacity(0.5),
+                                    color: cs.onSurface.withValues(alpha: 0.5),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -319,19 +318,19 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                                        color: cs.onSurface.withOpacity(0.5),
+                                        color: cs.onSurface.withValues(alpha: 0.5),
                                       ),
                                       onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                                     ),
                                     filled: true,
-                                    fillColor: cs.surfaceContainerHighest.withOpacity(0.3),
+                                    fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide.none,
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: cs.outline.withOpacity(0.3)),
+                                      borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.3)),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -339,7 +338,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: AppColors.error, width: 1),
+                                      borderSide: const BorderSide(color: AppColors.error, width: 1),
                                     ),
                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                   ),
@@ -386,10 +385,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
                                     Icon(Icons.arrow_back, size: 16, color: cs.primary),
                                     const SizedBox(width: 8),
                                     TextButton(
-                                      onPressed: () => Navigator.pushAndRemoveUntil(
+                                      onPressed: () => Navigator.popUntil(
                                         context,
-                                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                                        (route) => false,
+                                        (route) => route.isFirst,
                                       ),
                                       style: TextButton.styleFrom(
                                         padding: EdgeInsets.zero,
@@ -437,10 +435,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.check_circle_outline,
                 size: 50,
                 color: AppColors.success,
@@ -460,7 +458,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: cs.onSurface.withOpacity(0.7),
+                color: cs.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 24),
@@ -468,12 +466,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    (route) => false,
-                  );
+                  Navigator.popUntil(context, (route) => route.isFirst);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.success,

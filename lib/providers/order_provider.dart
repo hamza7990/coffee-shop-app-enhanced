@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/order.dart';
 import '../models/menu_item.dart';
-import '../data/sample_data.dart';
 import '../data/api_client.dart';
 import 'api_provider.dart';
 import 'local_storage_provider.dart';
@@ -44,36 +43,15 @@ class OrderNotifier extends AsyncNotifier<OrderState> {
   }
 
   Future<OrderState> _fetchOrders() async {
-    final api = ref.read(apiRepositoryProvider);
-    final repo = ref.read(localStorageProvider);
+    final repo = ref.read(orderRepositoryProvider);
+    
+    final active = await repo.fetchActiveOrders();
+    final completed = await repo.fetchCompletedOrders();
 
-    try {
-      final active = await api.fetchOrders(status: OrderStatus.active);
-      final completed = await api.fetchOrders(status: OrderStatus.completed);
-
-      // Cache fresh data
-      repo.saveActiveOrders(active);
-      repo.saveCompletedOrders(completed);
-
-      return OrderState(
-        active: active,
-        completed: completed,
-        counter: completed.length + 1,
-      );
-    } on NetworkException {
-      return _fallbackToCache(repo);
-    } on ApiException {
-      return _fallbackToCache(repo);
-    }
-  }
-
-  OrderState _fallbackToCache(dynamic repo) {
-    final cachedActive = repo.loadActiveOrders() ?? List<Order>.from(seedActiveOrders);
-    final cachedCompleted = repo.loadCompletedOrders() ?? List<Order>.from(seedCompletedOrders);
     return OrderState(
-      active: cachedActive,
-      completed: cachedCompleted,
-      counter: cachedCompleted.length + 1,
+      active: active,
+      completed: completed,
+      counter: completed.length + 1,
     );
   }
 
@@ -109,29 +87,29 @@ class OrderNotifier extends AsyncNotifier<OrderState> {
 
   // ── Create ──────────────────────────────────────────────────
   Future<String> createOrder(int tableId, List<OrderItem> items) async {
-    final api = ref.read(apiRepositoryProvider);
-    final repo = ref.read(localStorageProvider);
+    final repo = ref.read(orderRepositoryProvider);
+    final localRepo = ref.read(localStorageProvider);
 
     try {
       // Create via API – server assigns the ID
-      final newOrder = await api.createOrder(tableId, items);
+      final newOrder = await repo.createOrder(tableId, items);
 
       final current = state.value;
       if (current != null) {
         final updatedActive = [...current.active, newOrder];
         state = AsyncData(current.copyWith(active: updatedActive));
-        repo.saveActiveOrders(updatedActive);
+        localRepo.saveActiveOrders(updatedActive);
       }
       return newOrder.id;
     } on NetworkException {
       // Offline fallback – create locally
-      return _createLocal(tableId, items, repo);
+      return _createLocal(tableId, items, localRepo);
     } on ApiException {
-      return _createLocal(tableId, items, repo);
+      return _createLocal(tableId, items, localRepo);
     }
   }
 
-  String _createLocal(int tableId, List<OrderItem> items, dynamic repo) {
+  String _createLocal(int tableId, List<OrderItem> items, dynamic localRepo) {
     final id = 'act-${DateTime.now().millisecondsSinceEpoch}';
     final newOrder = Order(id: id, tableId: tableId, items: items);
 
@@ -139,7 +117,7 @@ class OrderNotifier extends AsyncNotifier<OrderState> {
     if (current != null) {
       final updatedActive = [...current.active, newOrder];
       state = AsyncData(current.copyWith(active: updatedActive));
-      repo.saveActiveOrders(updatedActive);
+      localRepo.saveActiveOrders(updatedActive);
     }
     return id;
   }
@@ -180,7 +158,7 @@ class OrderNotifier extends AsyncNotifier<OrderState> {
     if (order == null) return;
 
     try {
-      await ref.read(apiRepositoryProvider).updateOrder(orderId, order.items);
+      await ref.read(orderRepositoryProvider).updateOrderItems(orderId, order.items);
     } catch (_) {
       // Silently fail – local state is already updated
     }
@@ -192,15 +170,15 @@ class OrderNotifier extends AsyncNotifier<OrderState> {
     PaymentMethod method,
     MenuItem? Function(String) menuLookup,
   ) async {
-    final api = ref.read(apiRepositoryProvider);
-    final repo = ref.read(localStorageProvider);
+    final repo = ref.read(orderRepositoryProvider);
+    final localRepo = ref.read(localStorageProvider);
     final current = state.value;
 
     final order = findActive(orderId)!;
     final total = _calcTotal(order.items, menuLookup);
 
     try {
-      final completed = await api.completeOrder(orderId, method, total);
+      final completed = await repo.completeOrder(orderId, method, total);
 
       if (current != null) {
         final updatedActive = current.active.where((o) => o.id != orderId).toList();
@@ -210,14 +188,14 @@ class OrderNotifier extends AsyncNotifier<OrderState> {
           completed: updatedCompleted,
           counter: current.counter + 1,
         ));
-        repo.saveActiveOrders(updatedActive);
-        repo.saveCompletedOrders(updatedCompleted);
+        localRepo.saveActiveOrders(updatedActive);
+        localRepo.saveCompletedOrders(updatedCompleted);
       }
       return completed;
     } on NetworkException {
-      return _completeLocal(orderId, method, total, order, current, repo);
+      return _completeLocal(orderId, method, total, order, current, localRepo);
     } on ApiException {
-      return _completeLocal(orderId, method, total, order, current, repo);
+      return _completeLocal(orderId, method, total, order, current, localRepo);
     }
   }
 
@@ -227,7 +205,7 @@ class OrderNotifier extends AsyncNotifier<OrderState> {
     double total,
     Order order,
     OrderState? current,
-    dynamic repo,
+    dynamic localRepo,
   ) {
     final completed = order.copyWith(
       id: 'ORD-${(current?.counter ?? 1).toString().padLeft(3, '0')}',
@@ -246,8 +224,8 @@ class OrderNotifier extends AsyncNotifier<OrderState> {
         completed: updatedCompleted,
         counter: current.counter + 1,
       ));
-      repo.saveActiveOrders(updatedActive);
-      repo.saveCompletedOrders(updatedCompleted);
+      localRepo.saveActiveOrders(updatedActive);
+      localRepo.saveCompletedOrders(updatedCompleted);
     }
     return completed;
   }

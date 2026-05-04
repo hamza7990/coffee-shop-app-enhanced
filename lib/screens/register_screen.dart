@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
-import 'home_screen.dart';
+import '../utils/app_sizes.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -67,7 +67,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final emailRegex = RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Please enter a valid email';
     }
@@ -118,9 +118,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     // Navigate to home on successful registration
     if (authState.isLoggedIn) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
       });
     }
 
@@ -131,26 +131,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              cs.primary.withOpacity(0.1),
+              cs.primary.withValues(alpha: 0.1),
               cs.surface,
             ],
           ),
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppSizes.p24),
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 450),
                 child: Card(
                   elevation: 8,
-                  shadowColor: cs.primary.withOpacity(0.2),
+                  shadowColor: cs.primary.withValues(alpha: 0.2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(AppSizes.p32),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -163,7 +163,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             size: 64,
                             color: cs.primary,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSizes.p16),
                           Text(
                             'Create Account',
                             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -172,41 +172,41 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSizes.p8),
                           Text(
                             'Join Brewhaus and manage your coffee shop',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: cs.onSurface.withOpacity(0.7),
+                              color: cs.onSurface.withValues(alpha: 0.7),
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: AppSizes.p32),
 
                           // Error message
                           if (authState.errorMessage != null) ...[
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppColors.error.withOpacity(0.1),
+                                color: AppColors.error.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: AppColors.error.withOpacity(0.3),
+                                  color: AppColors.error.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                                  const Icon(Icons.error_outline, color: AppColors.error, size: 20),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       authState.errorMessage!,
-                                      style: TextStyle(color: AppColors.error, fontSize: 13),
+                                      style: const TextStyle(color: AppColors.error, fontSize: 13),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppSizes.p16),
                           ],
 
                           // Name field
@@ -217,7 +217,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             icon: Icons.person_outline,
                             validator: _validateName,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSizes.p16),
 
                           // Email field
                           _buildTextField(
@@ -228,7 +228,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             keyboardType: TextInputType.emailAddress,
                             validator: _validateEmail,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSizes.p16),
 
                           // Password field
                           _buildTextField(
@@ -241,21 +241,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                                color: cs.onSurface.withOpacity(0.5),
+                                color: cs.onSurface.withValues(alpha: 0.5),
                               ),
                               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSizes.p8),
                           // Password requirements hint
                           Text(
                             'Min 6 chars, 1 uppercase, 1 number',
                             style: TextStyle(
                               fontSize: 11,
-                              color: cs.onSurface.withOpacity(0.5),
+                              color: cs.onSurface.withValues(alpha: 0.5),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSizes.p16),
 
                           // Confirm Password field
                           _buildTextField(
@@ -268,12 +268,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                                color: cs.onSurface.withOpacity(0.5),
+                                color: cs.onSurface.withValues(alpha: 0.5),
                               ),
                               onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSizes.p24),
 
                           // Register button
                           SizedBox(
@@ -306,18 +306,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                     ),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSizes.p24),
 
                           // Divider
                           Row(
                             children: [
                               Expanded(child: Divider(color: cs.outline)),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                padding: const EdgeInsets.symmetric(horizontal: AppSizes.p16),
                                 child: Text(
                                   'OR',
                                   style: TextStyle(
-                                    color: cs.onSurface.withOpacity(0.5),
+                                    color: cs.onSurface.withValues(alpha: 0.5),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -325,7 +325,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               Expanded(child: Divider(color: cs.outline)),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSizes.p24),
 
                           // Login link
                           Row(
@@ -333,7 +333,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             children: [
                               Text(
                                 'Already have an account? ',
-                                style: TextStyle(color: cs.onSurface.withOpacity(0.7)),
+                                style: TextStyle(color: cs.onSurface.withValues(alpha: 0.7)),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
@@ -388,14 +388,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         prefixIcon: Icon(icon, color: cs.primary),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: cs.surfaceContainerHighest.withOpacity(0.3),
+        fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: cs.outline.withOpacity(0.3)),
+          borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -403,7 +403,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error, width: 1),
+          borderSide: const BorderSide(color: AppColors.error, width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),

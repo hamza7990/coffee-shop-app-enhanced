@@ -130,7 +130,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: cs.outline),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.03), blurRadius: 10)
+                    BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03), blurRadius: 10)
                   ],
                 ),
                 child: Column(
@@ -181,14 +181,14 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                 Expanded(child: _MethodTile(
                   label: '💳 Card', selected: _method == PaymentMethod.card,
                   color: AppColors.info,
-                  bg: AppColors.info.withOpacity(0.12),
+                  bg: AppColors.info.withValues(alpha: 0.12),
                   onTap: () => setState(() => _method = PaymentMethod.card),
                 )),
                 const SizedBox(width: 16),
                 Expanded(child: _MethodTile(
                   label: '💵 Cash', selected: _method == PaymentMethod.cash,
                   color: AppColors.success,
-                  bg: AppColors.success.withOpacity(0.12),
+                  bg: AppColors.success.withValues(alpha: 0.12),
                   onTap: () => setState(() => _method = PaymentMethod.cash),
                 )),
               ]),
@@ -206,7 +206,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.12),
+                      color: AppColors.success.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text('Change: \$${change.toStringAsFixed(2)}',
@@ -258,7 +258,7 @@ class _MethodTile extends StatelessWidget {
         child: Center(
           child: Text(label,
             style: AppTextStyles.title(context, size: 15).copyWith(
-              color: selected ? color : cs.onSurface.withOpacity(0.5)
+              color: selected ? color : cs.onSurface.withValues(alpha: 0.5)
             )
           ),
         ),
@@ -289,7 +289,7 @@ class ReceiptDialog extends ConsumerWidget {
             Container(
               width: 64, height: 64,
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.15), shape: BoxShape.circle,
+                color: AppColors.success.withValues(alpha: 0.15), shape: BoxShape.circle,
               ),
               child: const Icon(Icons.check, color: AppColors.success, size: 32),
             ),

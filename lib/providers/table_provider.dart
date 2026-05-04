@@ -78,8 +78,44 @@ class TableNotifier extends AsyncNotifier<List<CoffeeTable>> {
     try {
       await ref.read(apiRepositoryProvider).updateTableStatus(id, status);
     } catch (_) {
+      // Silently fail - keep optimistic local state for offline mode
+    }
+  }
+
+  Future<void> addTable(String name, int seats) async {
+    final api = ref.read(apiRepositoryProvider);
+
+    try {
+      final newTable = await api.createTable(name, seats);
+      final current = state.value ?? [];
+      state = AsyncData([...current, newTable]);
+      ref.read(localStorageProvider).saveTables([...current, newTable]);
+    } catch (e) {
+      // If API fails, add local placeholder
+      final current = state.value ?? [];
+      final localId = (current.isEmpty ? 0 : current.map((t) => t.id).reduce((a, b) => a > b ? a : b)) + 1;
+      final local = CoffeeTable(id: localId, name: name, seats: seats);
+      state = AsyncData([...current, local]);
+      ref.read(localStorageProvider).saveTables([...current, local]);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteTable(int id) async {
+    final current = state.value;
+    if (current == null) return;
+
+    // Optimistic removal
+    final updated = current.where((t) => t.id != id).toList();
+    state = AsyncData(updated);
+    ref.read(localStorageProvider).saveTables(updated);
+
+    try {
+      await ref.read(apiRepositoryProvider).deleteTable(id);
+    } catch (_) {
       // Revert on failure
-      state = AsyncData(previous);
+      state = AsyncData(current);
+      ref.read(localStorageProvider).saveTables(current);
     }
   }
 
@@ -96,7 +132,7 @@ class TableNotifier extends AsyncNotifier<List<CoffeeTable>> {
       await ref.read(apiRepositoryProvider)
           .updateTableStatus(tableId, TableStatus.occupied, activeOrderId: orderId);
     } catch (_) {
-      state = AsyncData(previous);
+      // Silently fail - keep optimistic local state for offline mode
     }
   }
 
@@ -113,7 +149,7 @@ class TableNotifier extends AsyncNotifier<List<CoffeeTable>> {
       await ref.read(apiRepositoryProvider)
           .updateTableStatus(tableId, TableStatus.available, clearOrder: true);
     } catch (_) {
-      state = AsyncData(previous);
+      // Silently fail - keep optimistic local state for offline mode
     }
   }
 

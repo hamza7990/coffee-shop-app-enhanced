@@ -148,7 +148,7 @@ class _MenuItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs     = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
@@ -165,8 +165,8 @@ class _MenuItemCard extends StatelessWidget {
                 onTap: onEdit,
                 child: Container(
                   width: 32, height: 32,
-                  decoration: BoxDecoration(color: cs.outline.withOpacity(0.3), borderRadius: BorderRadius.circular(10)),
-                  child: Icon(Icons.edit_outlined, size: 16, color: cs.onSurface.withOpacity(0.7)),
+                  decoration: BoxDecoration(color: cs.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(10)),
+                  child: Icon(Icons.edit_outlined, size: 16, color: cs.onSurface.withValues(alpha: 0.7)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -175,7 +175,7 @@ class _MenuItemCard extends StatelessWidget {
                 onTap: onDelete,
                 child: Container(
                   width: 32, height: 32,
-                  decoration: BoxDecoration(color: AppColors.error.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                   child: const Icon(Icons.delete_outline, size: 16, color: AppColors.error),
                 ),
               ),
@@ -198,14 +198,14 @@ class _MenuItemCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: item.enabled
-                        ? AppColors.success.withOpacity(0.12)
-                        : cs.outline.withOpacity(0.3),
+                        ? AppColors.success.withValues(alpha: 0.12)
+                        : cs.outline.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(item.enabled ? '● Active' : '○ Off',
                       style: TextStyle(
                         fontSize: 11, fontWeight: FontWeight.w700,
-                        color: item.enabled ? AppColors.success : cs.onSurface.withOpacity(0.5),
+                        color: item.enabled ? AppColors.success : cs.onSurface.withValues(alpha: 0.5),
                       )),
                 ),
               ),
@@ -304,7 +304,7 @@ class _MenuEditorSheetState extends State<_MenuEditorSheet> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<MenuCategory>(
                     isExpanded: true,
-                    value: _category,
+                    initialValue: _category,
                     icon: const Icon(Icons.arrow_drop_down, size: 20),
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

@@ -72,10 +72,24 @@ class ApiRepository {
         .toList();
   }
 
+  Future<CoffeeTable> createTable(String tableNumber, int capacity) async {
+    final data = await _client.post('/tables', body: {
+      'tableNumber': tableNumber,
+      'capacity': capacity,
+    });
+    return CoffeeTable.fromApiJson(data as Map<String, dynamic>);
+  }
+
+  Future<void> deleteTable(int tableId) async {
+    await _client.delete('/tables/$tableId');
+  }
+
   Future<CoffeeTable> updateTableStatus(
       int tableId, TableStatus status, {String? activeOrderId, bool clearOrder = false}) async {
+    // Backend expects PascalCase enum: Available, Occupied, Reserved
+    final statusStr = status.name[0].toUpperCase() + status.name.substring(1);
     final data = await _client.patch('/tables/$tableId/status', body: {
-      'status': status.name,
+      'status': statusStr,
     });
     return CoffeeTable.fromApiJson(data as Map<String, dynamic>);
   }
@@ -83,7 +97,9 @@ class ApiRepository {
   // ── Menu ────────────────────────────────────────────────────
   /// Fetch menu items from /menu/items endpoint (returns PagedResult)
   Future<List<MenuItem>> fetchMenu() async {
-    final data = await _client.get('/menu/items');
+    final data = await _client.get('/menu/items', queryParams: {
+      'pageSize': '1000',
+    });
     // Backend returns PagedResult { items, totalCount, page, pageSize }
     final items = data['items'] as List<dynamic>? ?? [];
     return items
@@ -108,10 +124,12 @@ class ApiRepository {
   // ── Orders ──────────────────────────────────────────────────
   /// Fetch orders from /orders endpoint (returns PagedResult)
   Future<List<Order>> fetchOrders({OrderStatus? status}) async {
-    final query = <String, String>{};
+    final query = <String, String>{
+      'pageSize': '1000',
+    };
     if (status != null) query['status'] = status.name;
 
-    final data = await _client.get('/orders', queryParams: query.isNotEmpty ? query : null);
+    final data = await _client.get('/orders', queryParams: query);
     // Backend returns PagedResult { items, totalCount, page, pageSize }
     final items = data['items'] as List<dynamic>? ?? [];
     return items

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/app_sizes.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
@@ -47,7 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final emailRegex = RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Please enter a valid email';
     }
@@ -89,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               width: 400, height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(isDark ? 0.08 : 0.1),
+                color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.1),
               ),
             ),
           ),
@@ -99,7 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               width: 280, height: 280,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primaryDark.withOpacity(isDark ? 0.05 : 0.08),
+                color: AppColors.primaryDark.withValues(alpha: isDark ? 0.05 : 0.08),
               ),
             ),
           ),
@@ -124,7 +125,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.3),
+                                color: AppColors.primary.withValues(alpha: 0.3),
                                 blurRadius: 24,
                                 offset: const Offset(0, 8)
                               )
@@ -142,13 +143,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                         // Card
                         Container(
-                          padding: const EdgeInsets.all(32),
+                          padding: const EdgeInsets.all(AppSizes.p32),
                           decoration: BoxDecoration(
                             color: cs.surface,
                             borderRadius: BorderRadius.circular(28),
                             border: Border.all(color: cs.outline),
                             boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(isDark ? 0.4 : 0.05), blurRadius: 24)
+                              BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.05), blurRadius: 24)
                             ],
                           ),
                           child: Form(
@@ -158,14 +159,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               children: [
                                 Text('Welcome back',
                                     style: AppTextStyles.title(context, size: 24)),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: AppSizes.p8),
                                 Text('Sign in to your dashboard',
                                     style: AppTextStyles.muted(context, size: 14)),
-                                const SizedBox(height: 32),
+                                const SizedBox(height: AppSizes.p32),
 
                                 // Email
                                 Text('Email', style: AppTextStyles.title(context, size: 14)),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: AppSizes.p8),
                                 TextFormField(
                                   controller: _emailCtrl,
                                   keyboardType: TextInputType.emailAddress,
@@ -175,7 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     prefixIcon: Icon(Icons.email_outlined, color: cs.primary),
                                   ),
                                 ),
-                                const SizedBox(height: 20),
+                                const SizedBox(height: AppSizes.p20),
 
                                 // Password
                                 Row(
@@ -205,7 +206,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: AppSizes.p8),
                                 TextFormField(
                                   controller: _passwordCtrl,
                                   obscureText: _obscure,
@@ -222,11 +223,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 ),
 
                                 if (authState.errorMessage != null) ...[
-                                   const SizedBox(height: 16),
+                                   const SizedBox(height: AppSizes.p16),
                                    Container(
-                                     padding: const EdgeInsets.all(12),
+                                     padding: const EdgeInsets.all(AppSizes.p12),
                                      decoration: BoxDecoration(
-                                       color: AppColors.error.withOpacity(0.1),
+                                       color: AppColors.error.withValues(alpha: 0.1),
                                        borderRadius: BorderRadius.circular(12),
                                      ),
                                      child: Text(authState.errorMessage!,
@@ -234,7 +235,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                    ),
                                 ],
 
-                                const SizedBox(height: 32),
+                                const SizedBox(height: AppSizes.p32),
                                 SizedBox(
                                   width: double.infinity,
                                   height: 50,
@@ -252,13 +253,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                         : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                                   ),
                                 ),
-                                const SizedBox(height: 20),
+                                const SizedBox(height: AppSizes.p20),
                                 Center(
                                   child: Text('Demo: admin@brewhaus.com / password',
                                       style: AppTextStyles.muted(context, size: 12)),
                                 ),
 
-                                const SizedBox(height: 24),
+                                const SizedBox(height: AppSizes.p24),
                                 // Register link
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,

@@ -1,12 +1,10 @@
 // lib/data/api_client.dart
 // ─────────────────────────────────────────────────────────────
 // Centralized HTTP client for all REST API calls.
-// Handles headers, timeouts, error mapping, auth tokens, and ApiResponse wrapper.
+// Handles headers, timeouts, error mapping, auth tokens, and ApiResponse wrapper using Dio.
 // ─────────────────────────────────────────────────────────────
 
-import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 /// Custom exception thrown for all API errors.
 class ApiException implements Exception {
@@ -58,131 +56,144 @@ class ApiResponse<T> {
 
 class ApiClient {
   final String baseUrl;
-  final http.Client _client;
-  final Duration timeout;
+  final void Function()? onUnauthorized;
+  final void Function()? onForbidden;
+  late final Dio _dio;
   String? _authToken;
 
   ApiClient({
     required this.baseUrl,
-    http.Client? client,
-    this.timeout = const Duration(seconds: 10),
-  }) : _client = client ?? http.Client();
+    this.onUnauthorized,
+    this.onForbidden,
+    Dio? dio,
+  }) {
+    _dio = dio ?? Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        responseType: ResponseType.json,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    // Add interceptors
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (_authToken != null) {
+            options.headers['Authorization'] = 'Bearer $_authToken';
+          }
+          return handler.next(options);
+        },
+      ),
+    );
+    _dio.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        logPrint: (obj) => print('[API] $obj'),
+      ),
+    );
+  }
 
   // ── Auth ────────────────────────────────────────────────────
   void setAuthToken(String? token) => _authToken = token;
   String? get authToken => _authToken;
   bool get isAuthenticated => _authToken != null;
 
-  // ── Headers ─────────────────────────────────────────────────
-  Map<String, String> get _headers {
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-    if (_authToken != null) {
-      headers['Authorization'] = 'Bearer $_authToken';
-    }
-    return headers;
-  }
-
   // ── GET ─────────────────────────────────────────────────────
-  Future<dynamic> get(String path, {Map<String, String>? queryParams}) async {
-    final uri = _buildUri(path, queryParams);
-    final response = await _safeRequest(() =>
-        _client.get(uri, headers: _headers).timeout(timeout));
-    return _handleResponse(response);
+  Future<dynamic> get(String path, {Map<String, dynamic>? queryParams}) async {
+    return _safeRequest(() => _dio.get(path, queryParameters: queryParams));
   }
 
   // ── POST ────────────────────────────────────────────────────
-  Future<dynamic> post(String path, {Map<String, dynamic>? body}) async {
-    final uri = _buildUri(path);
-    final response = await _safeRequest(() =>
-        _client.post(uri, headers: _headers, body: jsonEncode(body ?? {})).timeout(timeout));
-    return _handleResponse(response);
+  Future<dynamic> post(String path, {dynamic body}) async {
+    return _safeRequest(() => _dio.post(path, data: body));
   }
 
   // ── PUT ─────────────────────────────────────────────────────
-  Future<dynamic> put(String path, {Map<String, dynamic>? body}) async {
-    final uri = _buildUri(path);
-    final response = await _safeRequest(() =>
-        _client.put(uri, headers: _headers, body: jsonEncode(body ?? {})).timeout(timeout));
-    return _handleResponse(response);
+  Future<dynamic> put(String path, {dynamic body}) async {
+    return _safeRequest(() => _dio.put(path, data: body));
   }
 
   // ── PATCH ───────────────────────────────────────────────────
-  Future<dynamic> patch(String path, {Map<String, dynamic>? body}) async {
-    final uri = _buildUri(path);
-    final response = await _safeRequest(() =>
-        _client.patch(uri, headers: _headers, body: jsonEncode(body ?? {})).timeout(timeout));
-    return _handleResponse(response);
+  Future<dynamic> patch(String path, {dynamic body}) async {
+    return _safeRequest(() => _dio.patch(path, data: body));
   }
 
   // ── DELETE ──────────────────────────────────────────────────
   Future<dynamic> delete(String path) async {
-    final uri = _buildUri(path);
-    final response = await _safeRequest(() =>
-        _client.delete(uri, headers: _headers).timeout(timeout));
-    return _handleResponse(response);
+    return _safeRequest(() => _dio.delete(path));
   }
 
   // ── Internals ───────────────────────────────────────────────
-  Uri _buildUri(String path, [Map<String, String>? queryParams]) {
-    final fullPath = '$baseUrl$path';
-    final uri = Uri.parse(fullPath);
-    if (queryParams != null && queryParams.isNotEmpty) {
-      return uri.replace(queryParameters: queryParams);
-    }
-    return uri;
-  }
-
-  Future<http.Response> _safeRequest(Future<http.Response> Function() request) async {
+  Future<dynamic> _safeRequest(Future<Response> Function() request) async {
     try {
-      return await request();
-    } on SocketException {
-      throw const NetworkException('Unable to reach the server. Check your connection.');
-    } on HttpException {
-      throw const NetworkException('HTTP error occurred.');
-    } on FormatException {
-      throw const ApiException(0, 'Invalid response format.');
+      final response = await request();
+      return _handleResponse(response);
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        throw const NetworkException('Unable to reach the server. Check your connection.');
+      }
+      
+      if (e.response != null) {
+        if (e.response!.statusCode == 401) onUnauthorized?.call();
+        if (e.response!.statusCode == 403) onForbidden?.call();
+        return _handleResponse(e.response!);
+      }
+      
+      throw NetworkException('Request failed: ${e.message}');
     } catch (e) {
       if (e is ApiException || e is NetworkException) rethrow;
-      throw NetworkException('Request failed: $e');
+      throw NetworkException('Unexpected error: $e');
     }
   }
 
-  dynamic _handleResponse(http.Response response) {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) return null;
+  dynamic _handleResponse(Response response) {
+    if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+      if (response.data == null || response.data == '') return null;
 
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.data is Map<String, dynamic>) {
+        final body = response.data as Map<String, dynamic>;
 
-      // Handle ApiResponse wrapper format
-      if (body.containsKey('success') && body.containsKey('data')) {
-        final success = body['success'] as bool? ?? false;
-        final message = body['message'] as String? ?? 'Unknown error';
+        // Handle ApiResponse wrapper format if present
+        if (body.containsKey('success') && body.containsKey('data')) {
+          final success = body['success'] as bool? ?? false;
+          final message = body['message'] as String? ?? 'Unknown error';
 
-        if (!success) {
-          throw ApiException(response.statusCode, message);
+          if (!success) {
+            throw ApiException(response.statusCode!, message);
+          }
+
+          return body['data'];
         }
-
-        return body['data'];
       }
-
-      // Return raw body if not wrapped
-      return body;
+      
+      // Return raw body if not wrapped or not a map
+      return response.data;
     }
 
     // Try to extract error message from JSON body
     String message;
     try {
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      message = body['message'] ?? body['error'] ?? 'Unknown error';
+      if (response.data is Map<String, dynamic>) {
+        final body = response.data as Map<String, dynamic>;
+        message = body['message'] ?? body['error'] ?? 'Unknown error';
+      } else {
+        message = response.statusMessage ?? 'Request failed';
+      }
     } catch (_) {
-      message = response.reasonPhrase ?? 'Request failed';
+      message = response.statusMessage ?? 'Request failed';
     }
 
-    throw ApiException(response.statusCode, message);
+    throw ApiException(response.statusCode ?? 500, message);
   }
 
-  void dispose() => _client.close();
+  void dispose() => _dio.close();
 }

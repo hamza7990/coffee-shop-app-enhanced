@@ -126,7 +126,7 @@ class AnalyticsScreen extends ConsumerWidget {
                         spots: seedHourly.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.revenue)).toList(),
                         isCurved: true,
                         color: cs.primary, barWidth: 2.5,
-                        belowBarData: BarAreaData(show: true, color: cs.primary.withOpacity(0.1)),
+                        belowBarData: BarAreaData(show: true, color: cs.primary.withValues(alpha: 0.1)),
                         dotData: const FlDotData(show: false),
                       )],
                       titlesData: FlTitlesData(
@@ -135,14 +135,14 @@ class AnalyticsScreen extends ConsumerWidget {
                           getTitlesWidget: (v, _) {
                             final i = v.toInt();
                             return i < seedHourly.length
-                                ? Text(seedHourly[i].hour, style: TextStyle(fontSize: 10, color: cs.onSurface.withOpacity(0.5)))
+                                ? Text(seedHourly[i].hour, style: TextStyle(fontSize: 10, color: cs.onSurface.withValues(alpha: 0.5)))
                                 : const SizedBox.shrink();
                           },
                         )),
                         leftTitles: AxisTitles(sideTitles: SideTitles(
                           showTitles: true, reservedSize: 40,
                           getTitlesWidget: (v, _) => Text('\$${v.toInt()}',
-                              style: TextStyle(fontSize: 10, color: cs.onSurface.withOpacity(0.5))),
+                              style: TextStyle(fontSize: 10, color: cs.onSurface.withValues(alpha: 0.5))),
                         )),
                         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -176,12 +176,12 @@ class AnalyticsScreen extends ConsumerWidget {
                           bottomTitles: AxisTitles(sideTitles: SideTitles(
                             showTitles: true, reservedSize: 22,
                             getTitlesWidget: (v, _) => Text(seedWeekly[v.toInt()].day,
-                                style: TextStyle(fontSize: 11, color: cs.onSurface.withOpacity(0.5))),
+                                style: TextStyle(fontSize: 11, color: cs.onSurface.withValues(alpha: 0.5))),
                           )),
                           leftTitles: AxisTitles(sideTitles: SideTitles(
                             showTitles: true, reservedSize: 30,
                             getTitlesWidget: (v, _) => Text('${v.toInt()}',
-                                style: TextStyle(fontSize: 10, color: cs.onSurface.withOpacity(0.5))),
+                                style: TextStyle(fontSize: 10, color: cs.onSurface.withValues(alpha: 0.5))),
                           )),
                           topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                           rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -232,14 +232,14 @@ class AnalyticsScreen extends ConsumerWidget {
                             final keys = catRevenue.keys.toList();
                             final i = v.toInt();
                             return i < keys.length
-                                ? Text(keys[i], style: TextStyle(fontSize: 10, color: cs.onSurface.withOpacity(0.5)))
+                                ? Text(keys[i], style: TextStyle(fontSize: 10, color: cs.onSurface.withValues(alpha: 0.5)))
                                 : const SizedBox.shrink();
                           },
                         )),
                         leftTitles: AxisTitles(sideTitles: SideTitles(
                           showTitles: true, reservedSize: 44,
                           getTitlesWidget: (v, _) => Text('\$${v.toInt()}',
-                              style: TextStyle(fontSize: 10, color: cs.onSurface.withOpacity(0.5))),
+                              style: TextStyle(fontSize: 10, color: cs.onSurface.withValues(alpha: 0.5))),
                         )),
                         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -265,7 +265,7 @@ class AnalyticsScreen extends ConsumerWidget {
                     sections: (cardCount == 0 && cashCount == 0)
                       ? [
                           PieChartSectionData(
-                            value: 1, color: cs.outline.withOpacity(0.2),
+                            value: 1, color: cs.outline.withValues(alpha: 0.2),
                             title: 'No Data', titleStyle: TextStyle(fontSize: 11, color: cs.onSurface),
                             radius: wide ? 50 : 40,
                           )
@@ -291,7 +291,7 @@ class AnalyticsScreen extends ConsumerWidget {
                     const SizedBox(height: 14),
                     _LegendTile(color: AppColors.success, label: '💵 Cash', value: '$cashCount'),
                     Divider(height: 24, color: cs.outline),
-                    Text('Total', style: TextStyle(fontSize: 12, color: cs.onSurface.withOpacity(0.5))),
+                    Text('Total', style: TextStyle(fontSize: 12, color: cs.onSurface.withValues(alpha: 0.5))),
                     // Preserved your custom AppTextStyles format
                     FittedBox(
                       fit: BoxFit.scaleDown,
@@ -323,7 +323,7 @@ class _MiniStat extends StatelessWidget {
   Widget build(BuildContext context) => AppCard(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)), maxLines: 1, overflow: TextOverflow.ellipsis),
+      Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)), maxLines: 1, overflow: TextOverflow.ellipsis),
       const SizedBox(height: 6),
       // Preserved your custom AppTextStyles format
       FittedBox(

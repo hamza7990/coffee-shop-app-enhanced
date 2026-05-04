@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/coffee_table.dart';
 import '../models/order.dart';
 
@@ -11,25 +12,27 @@ class LocalStorageRepository {
   static const _authTokenKey = 'auth_token';
 
   final SharedPreferences _prefs;
+  final FlutterSecureStorage _secureStorage;
 
-  LocalStorageRepository(this._prefs);
+  LocalStorageRepository(this._prefs, this._secureStorage);
 
   static Future<LocalStorageRepository> init() async {
     final prefs = await SharedPreferences.getInstance();
-    return LocalStorageRepository(prefs);
+    const secureStorage = FlutterSecureStorage();
+    return LocalStorageRepository(prefs, secureStorage);
   }
 
   // --- Auth Token ---
   Future<void> saveAuthToken(String token) async {
-    await _prefs.setString(_authTokenKey, token);
+    await _secureStorage.write(key: _authTokenKey, value: token);
   }
 
-  String? loadAuthToken() {
-    return _prefs.getString(_authTokenKey);
+  Future<String?> loadAuthToken() async {
+    return await _secureStorage.read(key: _authTokenKey);
   }
 
   Future<void> clearAuthToken() async {
-    await _prefs.remove(_authTokenKey);
+    await _secureStorage.delete(key: _authTokenKey);
   }
 
   // --- Theme ---
