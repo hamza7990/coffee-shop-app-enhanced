@@ -1,19 +1,9 @@
 // lib/utils/app_config.dart
 
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import '../core/config.dart';
 
 class AppConfig {
-  static String get apiUrl {
-    // Production backend port: 5000
-    if (kIsWeb) return 'http://localhost:5000/api';
-
-    try {
-      if (Platform.isAndroid) {
-        return 'http://10.0.2.2:5000/api';
-      }
-    } catch (_) {}
-
-    return 'http://localhost:5000/api';
-  }
+  /// Base API URL including the `/api` path prefix.
+  /// Reads from [ApiConfig.baseUrl] for centralized environment switching.
+  static String get apiUrl => '${ApiConfig.baseUrl}/api';
 }
