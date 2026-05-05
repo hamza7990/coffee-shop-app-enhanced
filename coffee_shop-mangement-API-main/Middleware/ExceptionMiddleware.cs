@@ -41,16 +41,13 @@ public class ExceptionMiddleware
         };
 
         context.Response.StatusCode = (int)statusCode;
-
+        
+        var response = ApiResponse<object>.Fail(message);
         var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
-        var details = env.IsDevelopment() ? ex.ToString() : null;
-
-        var response = new 
+        if (env.IsDevelopment())
         {
-            StatusCode = (int)statusCode,
-            Message = message,
-            Details = details
-        };
+            response.Message = $"{message} | {ex.Message}";
+        }
         
         return context.Response.WriteAsync(JsonSerializer.Serialize(response,
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));

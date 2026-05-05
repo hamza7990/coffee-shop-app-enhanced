@@ -16,8 +16,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl    = TextEditingController(text: 'admin@brewhaus.com');
-  final _passwordCtrl = TextEditingController(text: 'password');
+  final _emailCtrl    = TextEditingController();
+  final _passwordCtrl = TextEditingController();
   bool _obscure = true;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -253,13 +253,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                         : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                                   ),
                                 ),
-                                const SizedBox(height: AppSizes.p20),
-                                Center(
-                                  child: Text('Demo: admin@brewhaus.com / password',
-                                      style: AppTextStyles.muted(context, size: 12)),
-                                ),
-
-                                const SizedBox(height: AppSizes.p24),
+                                const SizedBox(height: AppSizes.p32),
                                 // Register link
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,

@@ -12,6 +12,15 @@ public interface IAuthService
     Task<bool> ResetPasswordAsync(ResetPasswordRequest request);
 }
 
+public interface IAdminService
+{
+    Task<List<UserDto>> GetAllUsersAsync();
+    Task<UserDto?> GetUserByIdAsync(int id);
+    Task<UserDto?> UpdateUserRoleAsync(int id, UpdateUserRoleRequest request);
+    Task<bool> DeleteUserAsync(int id);
+    Task<bool> LockUserAsync(int id, LockUserRequest request);
+}
+
 public interface ITokenService
 {
     string GenerateToken(User user);

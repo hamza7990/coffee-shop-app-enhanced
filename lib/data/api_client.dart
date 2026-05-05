@@ -163,15 +163,18 @@ class ApiClient {
         final body = response.data as Map<String, dynamic>;
 
         // Handle ApiResponse wrapper format if present
-        if (body.containsKey('success') && body.containsKey('data')) {
-          final success = body['success'] as bool? ?? false;
-          final message = body['message'] as String? ?? 'Unknown error';
+        final hasSuccess = body.containsKey('success') || body.containsKey('Success');
+        final hasData    = body.containsKey('data') || body.containsKey('Data');
+
+        if (hasSuccess && hasData) {
+          final success = (body['success'] ?? body['Success']) as bool? ?? false;
+          final message = (body['message'] ?? body['Message']) as String? ?? 'Unknown error';
 
           if (!success) {
             throw ApiException(response.statusCode!, message);
           }
 
-          return body['data'];
+          return body['data'] ?? body['Data'];
         }
       }
       

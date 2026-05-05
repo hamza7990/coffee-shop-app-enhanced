@@ -24,7 +24,7 @@ class ApiRepository {
       'email': email,
       'password': password,
     });
-    final token = data['token'] as String?;
+    final token = (data['token'] ?? data['Token']) as String?;
     if (token != null) {
       _client.setAuthToken(token);
     }
@@ -37,9 +37,8 @@ class ApiRepository {
       'name': name,
       'email': email,
       'password': password,
-      'role': 'Cashier',
     });
-    final token = data['token'] as String?;
+    final token = (data['token'] ?? data['Token']) as String?;
     if (token != null) {
       _client.setAuthToken(token);
     }

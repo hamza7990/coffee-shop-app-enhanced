@@ -24,7 +24,7 @@ public class OrdersController : ControllerBase
         [FromQuery] OrderStatus? status   = null)
     {
         int? cashierId = null;
-        if (User.IsInRole("Employee"))
+        if (User.IsInRole("User"))
         {
             cashierId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         }

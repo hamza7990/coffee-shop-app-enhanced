@@ -49,14 +49,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         final role = authState.role;
         if (role == 'Admin') return '/admin';
         if (role == 'Manager') return '/manager';
-        if (role == 'Employee') return '/employee';
+        if (role == 'User') return '/employee';
         return '/login'; // Fallback
       }
 
       // Protect routes based on roles
       if (state.matchedLocation.startsWith('/admin') && authState.role != 'Admin') return '/login';
       if (state.matchedLocation.startsWith('/manager') && authState.role != 'Manager') return '/login';
-      if (state.matchedLocation.startsWith('/employee') && authState.role != 'Employee') return '/login';
+      if (state.matchedLocation.startsWith('/employee') && authState.role != 'User') return '/login';
 
       return null;
     },

@@ -39,7 +39,6 @@ public class RegisterRequest
     [Required]               public string Name     { get; set; } = string.Empty;
     [Required, EmailAddress] public string Email    { get; set; } = string.Empty;
     [Required, MinLength(6)] public string Password { get; set; } = string.Empty;
-    public string Role { get; set; } = "Cashier";
 }
 
 public class AuthResponse
@@ -52,10 +51,25 @@ public class AuthResponse
 
 public class UserDto
 {
-    public int    Id    { get; set; }
-    public string Name  { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string Role  { get; set; } = string.Empty;
+    public int       Id    { get; set; }
+    public string    Name  { get; set; } = string.Empty;
+    public string    Email { get; set; } = string.Empty;
+    public UserRole  Role  { get; set; }
+    public bool      IsActive { get; set; } = true;
+    public DateTime? LockedUntil { get; set; }
+    public DateTime  CreatedAt { get; set; }
+}
+
+// ── Admin User Management DTOs ─────────────────────────────────────────────────
+public class UpdateUserRoleRequest
+{
+    [Required] public UserRole Role { get; set; }
+}
+
+public class LockUserRequest
+{
+    public bool Lock { get; set; }
+    public int? Minutes { get; set; }
 }
 
 public class ForgotPasswordRequest

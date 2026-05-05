@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CoffeeShopAPI.Models;
 
+// ── Roles ─────────────────────────────────────────────────────────────────────
+public enum UserRole { User, Manager, Admin }
+
 // ── User ──────────────────────────────────────────────────────────────────────
 public class User
 {
@@ -10,9 +13,10 @@ public class User
     [Required] public string Name     { get; set; } = string.Empty;
     [Required] public string Email    { get; set; } = string.Empty;
     [Required] public string Password { get; set; } = string.Empty; // hashed
-    public string Role        { get; set; } = "Employee"; // Admin | Manager | Employee
+    public UserRole Role      { get; set; } = UserRole.User;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive      { get; set; } = true;
+    public DateTime? LockedUntil { get; set; }
 }
 
 // ── Category ──────────────────────────────────────────────────────────────────

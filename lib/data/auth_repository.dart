@@ -32,7 +32,6 @@ class AuthRepository {
       'name': name,
       'email': email,
       'password': password,
-      'role': 'Employee',
     });
     final token = data['token'] as String?;
     if (token != null) {

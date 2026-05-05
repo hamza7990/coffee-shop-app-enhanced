@@ -27,7 +27,8 @@ public class TokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.Sub,   user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(ClaimTypes.Name,               user.Name),
-            new Claim(ClaimTypes.Role,               user.Role),
+            new Claim(ClaimTypes.Role,               user.Role.ToString()),
+            new Claim("isActive",                    user.IsActive.ToString().ToLowerInvariant()),
             new Claim(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString())
         };
 
@@ -62,10 +63,16 @@ public class AuthService : IAuthService
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
         var user = await _db.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email && u.IsActive);
+            .FirstOrDefaultAsync(u => u.Email == request.Email);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             return null;
+
+        if (!user.IsActive)
+            return null; // Account deactivated
+
+        if (user.LockedUntil.HasValue && user.LockedUntil.Value > DateTime.UtcNow)
+            return null; // Account temporarily locked
 
         var token  = _tokenService.GenerateToken(user);
         var expiry = int.Parse(_config["Jwt:ExpiryInMinutes"] ?? "1440");
@@ -89,7 +96,7 @@ public class AuthService : IAuthService
             Name     = request.Name,
             Email    = request.Email,
             Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Role     = request.Role
+            Role     = UserRole.User // Never allow role selection during public registration
         };
 
         _db.Users.Add(user);
@@ -151,5 +158,14 @@ public class AuthService : IAuthService
     }
 
     private static UserDto MapToDto(User u) =>
-        new() { Id = u.Id, Name = u.Name, Email = u.Email, Role = u.Role };
+        new()
+        {
+            Id = u.Id,
+            Name = u.Name,
+            Email = u.Email,
+            Role = u.Role,
+            IsActive = u.IsActive,
+            LockedUntil = u.LockedUntil,
+            CreatedAt = u.CreatedAt
+        };
 }

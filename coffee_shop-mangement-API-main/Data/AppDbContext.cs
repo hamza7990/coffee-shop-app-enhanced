@@ -20,6 +20,11 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // ── Enum conversions ───────────────────────────────────────────────────
+        modelBuilder.Entity<User>()
+            .Property(u => u.Role)
+            .HasConversion<string>();
+
         // ── Unique constraints ─────────────────────────────────────────────────
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email).IsUnique();
@@ -41,15 +46,18 @@ public class AppDbContext : DbContext
             .HasForeignKey(o => o.CashierId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // ── Seed default admin user ────────────────────────────────────────────
+        // ── Seed default admin user (deterministic BCrypt hash) ──────────────────
+        // Pre-computed hash for "Ch@ngeMe#2024!" – change via env/config in production
+        var adminPasswordHash = "$2a$11$vQL5XTpT1V1RXJ5G0rZUGO0v9q.JQtuZgWpW.KZoJhKq6pP.W/0LW";
         modelBuilder.Entity<User>().HasData(new User
         {
             Id       = 1,
-            Name     = "Admin",
+            Name     = "System Admin",
             Email    = "admin@brewhaus.com",
-            Password = BCrypt.Net.BCrypt.HashPassword("password"),
-            Role     = "Admin",
-            IsActive = true
+            Password = adminPasswordHash,
+            Role     = UserRole.Admin,
+            IsActive = true,
+            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         });
 
         // ── Seed categories ────────────────────────────────────────────────────

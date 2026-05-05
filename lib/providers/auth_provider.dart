@@ -98,25 +98,15 @@ class AuthNotifier extends Notifier<AuthState> {
         errorMessage: e.message,
       );
     } on NetworkException {
-      // Offline demo mode – allow local login
-      if (email.isNotEmpty && password == 'password') {
-        state = state.copyWith(isLoggedIn: true, isLoading: false);
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: 'Server unreachable. For offline mode use password: "password"',
-        );
-      }
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Server unreachable. Please check your connection and try again.',
+      );
     } catch (e) {
-      // Fallback: allow demo login
-      if (email.isNotEmpty && password == 'password') {
-        state = state.copyWith(isLoggedIn: true, isLoading: false);
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: 'Login failed. For demo use password: "password"',
-        );
-      }
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Login failed. Please try again.',
+      );
     }
   }
 
@@ -141,11 +131,9 @@ class AuthNotifier extends Notifier<AuthState> {
         errorMessage: e.message,
       );
     } on NetworkException {
-      // Offline demo mode fallback for registration
       state = state.copyWith(
-        isLoggedIn: true,
         isLoading: false,
-        successMessage: 'Offline Mode: Registration successful! Welcome to Brewhaus.',
+        errorMessage: 'Server unreachable. Please check your connection and try again.',
       );
     } catch (e) {
       state = state.copyWith(
@@ -174,7 +162,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } on NetworkException {
       state = state.copyWith(
         isLoading: false,
-        successMessage: 'Offline Mode: If this email exists, a reset link has been sent.',
+        errorMessage: 'Server unreachable. Please check your connection and try again.',
       );
     } catch (e) {
       state = state.copyWith(
@@ -203,7 +191,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } on NetworkException {
       state = state.copyWith(
         isLoading: false,
-        successMessage: 'Offline Mode: Password reset successful! Please log in with your new password.',
+        errorMessage: 'Server unreachable. Please check your connection and try again.',
       );
     } catch (e) {
       state = state.copyWith(
