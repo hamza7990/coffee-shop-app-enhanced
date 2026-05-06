@@ -46,9 +46,13 @@ public class ExceptionMiddleware
         var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
         if (env.IsDevelopment())
         {
-            response.Message = $"{message} | {ex.Message}";
+            response.Message = $"{message} | {ex.GetType().Name}: {ex.Message}";
+            response.Errors = new List<string>
+            {
+                ex.StackTrace ?? "No stack trace available."
+            };
         }
-        
+
         return context.Response.WriteAsync(JsonSerializer.Serialize(response,
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
     }

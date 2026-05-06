@@ -51,28 +51,82 @@ public class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IConfiguration _config;
     private readonly IEmailService _emailService;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(AppDbContext db, ITokenService tokenService, IConfiguration config, IEmailService emailService)
+    public AuthService(AppDbContext db, ITokenService tokenService, IConfiguration config, IEmailService emailService, ILogger<AuthService> logger)
     {
         _db           = db;
         _tokenService = tokenService;
         _config       = config;
         _emailService = emailService;
+        _logger       = logger;
     }
 
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
+        var email = request.Email.Trim();
+        _logger.LogInformation("[LOGIN] Attempt for email: {Email}", email);
+
         var user = await _db.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email == email);
 
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+        if (user == null)
+        {
+            _logger.LogWarning("[LOGIN] FAIL — user not found: {Email}", email);
             return null;
+        }
 
+        _logger.LogInformation(
+            "[LOGIN] User found — Id:{UserId} Active:{IsActive} LockedUntil:{LockedUntil} Role:{Role} HashLength:{HashLen}",
+            user.Id, user.IsActive, user.LockedUntil, user.Role, user.Password?.Length ?? 0);
+
+        // ── Defensive: null/empty hash ───────────────────────────────────────
+        var storedHash = user.Password?.Trim();
+        if (string.IsNullOrWhiteSpace(storedHash))
+        {
+            _logger.LogError("[LOGIN] FAIL — stored password hash is null/empty for UserId:{UserId}", user.Id);
+            return null;
+        }
+
+        // ── Account status checks (before password to avoid timing leaks) ──────
         if (!user.IsActive)
-            return null; // Account deactivated
+        {
+            _logger.LogWarning("[LOGIN] FAIL — account deactivated for UserId:{UserId}", user.Id);
+            return null;
+        }
 
         if (user.LockedUntil.HasValue && user.LockedUntil.Value > DateTime.UtcNow)
-            return null; // Account temporarily locked
+        {
+            _logger.LogWarning("[LOGIN] FAIL — account locked until {LockedUntil} for UserId:{UserId}",
+                user.LockedUntil.Value, user.Id);
+            return null;
+        }
+
+        // ── BCrypt verification with bullet-proof exception handling ───────────
+        bool passwordValid;
+        try
+        {
+            passwordValid = BCrypt.Net.BCrypt.Verify(request.Password, storedHash);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "[LOGIN] FAIL — BCrypt exception for UserId:{UserId}. " +
+                "Type:{ExType} HashPrefix:{Prefix} HashLength:{Len}",
+                user.Id, ex.GetType().Name,
+                storedHash.Length >= 7 ? storedHash[..7] : storedHash,
+                storedHash.Length);
+            return null;
+        }
+
+        if (!passwordValid)
+        {
+            _logger.LogWarning("[LOGIN] FAIL — incorrect password for UserId:{UserId}", user.Id);
+            return null;
+        }
+
+        _logger.LogInformation("[LOGIN] SUCCESS — UserId:{UserId} Email:{Email}", user.Id, email);
 
         var token  = _tokenService.GenerateToken(user);
         var expiry = int.Parse(_config["Jwt:ExpiryInMinutes"] ?? "1440");

@@ -1,6 +1,7 @@
 using CoffeeShopAPI.Data;
 using CoffeeShopAPI.Hubs;
 using CoffeeShopAPI.Middleware;
+using CoffeeShopAPI.Models;
 using CoffeeShopAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -69,13 +70,14 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddSignalR();
 
 // ── CORS (Flutter-friendly) ───────────────────────────────────────────────────
+// NOTE: AllowAnyOrigin + AllowCredentials is INVALID in ASP.NET Core.
+// Since we use JWT Bearer (not cookies), we drop AllowCredentials.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()
-              .SetIsOriginAllowed(_ => true));
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
 });
 
 // ── Controllers + Swagger ─────────────────────────────────────────────────────
@@ -138,11 +140,51 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<OrderHub>("/hubs/orders");
 
-// ── Auto-migrate on startup ───────────────────────────────────────────────────
+// ── Auto-migrate + runtime admin seeding ──────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    var db     = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        logger.LogInformation("Applying database migrations...");
+        db.Database.Migrate();
+        logger.LogInformation("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "CRITICAL: Database migration failed. Check connection string and SQL Server availability.");
+        throw; // Re-throw so the container exits and can be restarted
+    }
+
+    // ── Runtime admin seeding (fallback if migration seed was skipped) ─────────
+    try
+    {
+        if (!db.Users.Any(u => u.Email == "admin@brewhaus.com"))
+        {
+            var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? "Ch@ngeMe#2024!";
+            db.Users.Add(new User
+            {
+                Name     = "System Admin",
+                Email    = "admin@brewhaus.com",
+                Password = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+                Role     = UserRole.Admin,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            });
+            db.SaveChanges();
+            logger.LogInformation("Admin user seeded at runtime. Email: admin@brewhaus.com");
+        }
+        else
+        {
+            logger.LogInformation("Admin user already exists in database.");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Admin seeding failed — you may need to create an admin manually.");
+    }
 }
 
 app.Run();   

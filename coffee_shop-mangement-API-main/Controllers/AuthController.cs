@@ -11,18 +11,38 @@ namespace CoffeeShopAPI.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ILogger<AuthController> _logger;
+    private readonly IWebHostEnvironment _env;
 
-    public AuthController(IAuthService authService) => _authService = authService;
+    public AuthController(IAuthService authService, ILogger<AuthController> logger, IWebHostEnvironment env)
+    {
+        _authService = authService;
+        _logger      = logger;
+        _env         = env;
+    }
 
     /// <summary>POST /api/auth/login — Returns JWT token</summary>
     [HttpPost("login")]
     public async Task<ActionResult<ApiResponse<AuthResponse>>> Login([FromBody] LoginRequest request)
     {
-        var result = await _authService.LoginAsync(request);
-        if (result == null)
-            return Unauthorized(ApiResponse<AuthResponse>.Fail("Invalid email or password."));
+        try
+        {
+            var result = await _authService.LoginAsync(request);
+            if (result == null)
+                return Unauthorized(ApiResponse<AuthResponse>.Fail("Invalid email or password."));
 
-        return Ok(ApiResponse<AuthResponse>.Ok(result, "Login successful."));
+            return Ok(ApiResponse<AuthResponse>.Ok(result, "Login successful."));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[LOGIN] Unhandled exception during login for {Email}", request.Email);
+
+            var msg = _env.IsDevelopment()
+                ? $"Login failed: {ex.Message}"
+                : "Login service unavailable. Please try again later.";
+
+            return StatusCode(500, ApiResponse<AuthResponse>.Fail(msg));
+        }
     }
 
     /// <summary>POST /api/auth/register — Public registration</summary>
