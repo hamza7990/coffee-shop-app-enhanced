@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj": {}
+    "d:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj": {}
   },
   "projects": {
-    "D:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj": {
+    "d:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj",
+        "projectUniqueName": "d:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj",
         "projectName": "CoffeeShopAPI",
-        "projectPath": "D:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj",
+        "projectPath": "d:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj",
         "packagesPath": "C:\\Users\\LOQ\\.nuget\\packages\\",
-        "outputPath": "D:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\obj\\",
+        "outputPath": "d:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

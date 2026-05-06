@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "5TU4LstoEBs=",
+  "dgSpecHash": "BXdTPGS/BbE=",
   "success": true,
-  "projectFilePath": "D:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj",
+  "projectFilePath": "d:\\coffee_shop_app\\coffee_shop_project\\coffee_shop-mangement-API-main\\CoffeeShopAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\LOQ\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\LOQ\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
