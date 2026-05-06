@@ -4,32 +4,46 @@
 # Usage:
 #   docker compose up --build -d
 #   docker compose logs -f api
+#
+# IMPORTANT: Set real secrets via a .env file on the VM:
+#   JWT_KEY=<64-char random string>
+#   SA_PASSWORD=<strong password>
+#   EMAIL_USER=your@gmail.com
+#   EMAIL_PASS=your-app-password
 # ──────────────────────────────────────────────────────────────────────────────
 
 version: "3.9"
 
+networks:
+  backend:
+    driver: bridge
+
 services:
+
   # ── SQL Server ─────────────────────────────────────────────────────────────
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: coffee-shop-sqlserver
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
-    ports:
-      - "1433:1433"
+      MSSQL_SA_PASSWORD: "${SA_PASSWORD:-YourStrong!Passw0rd}"
+    # FIX: Port 1433 is NOT published to the host.
+    # ports:
+    #   - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
+    networks:
+      - backend
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' -C || exit 1"
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${SA_PASSWORD:-YourStrong!Passw0rd}\" -Q 'SELECT 1' -C -N || exit 1"
         ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 45s
     restart: unless-stopped
 
   # ── ASP.NET Core Web API ───────────────────────────────────────────────────
@@ -42,12 +56,25 @@ services:
       - "8080:5000"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://0.0.0.0:5000
-      # Override the connection string at runtime (double-underscore = nested key)
-      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=CoffeeShopDB;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;"
+      ASPNETCORE_URLS: "http://0.0.0.0:5000"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=CoffeeShopDB;User Id=sa;Password=${SA_PASSWORD:-YourStrong!Passw0rd};TrustServerCertificate=True;Connection Timeout=30;"
+      Jwt__Key: "${JWT_KEY:-CoffeeShopSecretKey_PleaseChangeInProduction_MustBe32CharsLong!}"
+      Jwt__Issuer: "CoffeeShopAPI"
+      Jwt__Audience: "CoffeeShopFlutterApp"
+      Jwt__ExpiryInMinutes: "1440"
+      Email__SmtpHost: "smtp.gmail.com"
+      Email__SmtpPort: "587"
+      Email__Username: "${EMAIL_USER:-your-email@gmail.com}"
+      Email__Password: "${EMAIL_PASS:-your-app-password}"
+      Email__From: "${EMAIL_USER:-noreply@brewhaus.com}"
+      Email__FromName: "Brewhaus Coffee"
+      Email__AppUrl: "http://34.42.89.195:8080"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-Ch@ngeMe#2024!}"
     depends_on:
       sqlserver:
         condition: service_healthy
+    networks:
+      - backend
     restart: unless-stopped
 
 volumes:
